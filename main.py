@@ -5,17 +5,17 @@ from pathlib import Path
 from collections import defaultdict
 import time
 
-# Конфигурационные переменные
-DEFAULT_DIR = str(Path.home())  # Домашняя директория по умолчанию
-DEFAULT_DEPTH = 3  # Глубина отображения по умолчанию
-DEFAULT_MIN_SIZE = 300 * 1024 * 1024  # 300MB в байтах
-REPORT_FILE = 'report.txt'  # Имя файла отчета
-DEFAULT_TOP_FILES = 10  # Количество топ файлов по умолчанию
-DEFAULT_TOP_DIRS = 10  # Количество топ директорий по умолчанию
+# Configuration variables
+DEFAULT_DIR = str(Path.home())  # Default home directory
+DEFAULT_DEPTH = 3  # Default display depth
+DEFAULT_MIN_SIZE = 300 * 1024 * 1024  # 300MB in bytes
+REPORT_FILE = 'report.txt'  # Report filename
+DEFAULT_TOP_FILES = 10  # Default number of top files
+DEFAULT_TOP_DIRS = 10  # Default number of top directories
 
 
 class ProgressIndicator:
-    """Класс для отображения прогресса в консоли"""
+    """Class for displaying progress in console"""
 
     def __init__(self, silent=False):
         self.silent = silent
@@ -26,7 +26,7 @@ class ProgressIndicator:
         if self.silent:
             return
         self.spinner_pos = (self.spinner_pos + 1) % 4
-        sys.stdout.write(f"\rАнализирую {self.spinner[self.spinner_pos]}")
+        sys.stdout.write(f"\rAnalyzing {self.spinner[self.spinner_pos]}")
         sys.stdout.flush()
 
     def clear(self):
@@ -36,7 +36,7 @@ class ProgressIndicator:
 
 
 def get_size(start_path='.'):
-    """Рекурсивно вычисляет размер директории, количество поддиректорий и файлов"""
+    """Recursively calculates directory size, subdirectories and files count"""
     total_size = 0
     dir_count = 0
     file_count = 0
@@ -53,7 +53,7 @@ def get_size(start_path='.'):
 
 
 def format_size(size):
-    """Форматирует размер в удобочитаемый вид"""
+    """Formats size to human-readable format"""
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
         if size < 1024:
             return f"{size:.1f} {unit}"
@@ -62,7 +62,7 @@ def format_size(size):
 
 
 def find_large_items(path, min_size=0, top_files=10, top_dirs=10, progress=None):
-    """Находит самые большие файлы и директории"""
+    """Finds largest files and directories"""
     large_files = []
     large_dirs = []
 
@@ -70,7 +70,7 @@ def find_large_items(path, min_size=0, top_files=10, top_dirs=10, progress=None)
         if progress:
             progress.spin()
 
-        # Проверяем файлы
+        # Checking files
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
             try:
@@ -80,14 +80,14 @@ def find_large_items(path, min_size=0, top_files=10, top_dirs=10, progress=None)
             except (OSError, PermissionError):
                 continue
 
-        # Проверяем директории
+        # Checking directories
         try:
             dir_size, _, _ = get_size(dirpath)
             large_dirs.append((dirpath, dir_size))
         except (PermissionError, OSError):
             continue
 
-    # Сортируем и выбираем топ
+    # Sorting and selecting top
     large_files.sort(key=lambda x: x[1], reverse=True)
     large_dirs.sort(key=lambda x: x[1], reverse=True)
 
@@ -95,7 +95,7 @@ def find_large_items(path, min_size=0, top_files=10, top_dirs=10, progress=None)
 
 
 def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_SIZE):
-    """Рекурсивно анализирует директорию и возвращает структуру"""
+    """Recursively analyzes directory and returns structure"""
     if current_depth > max_depth:
         return None
 
@@ -111,7 +111,7 @@ def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_S
         'dir_count': dir_count,
         'file_count': file_count,
         'is_file': False,
-        'children': []  # Всегда инициализируем пустой список children
+        'children': []  # Always initialize empty list children
     }
 
     if current_depth < max_depth:
@@ -135,7 +135,7 @@ def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_S
                 except (OSError, PermissionError):
                     continue
 
-        # Сортируем директории по размеру (убывание)
+        # Sort directories by size (descending)
         dirs_sizes = []
         for name, full_path in dirs:
             try:
@@ -146,13 +146,13 @@ def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_S
 
         dirs_sizes.sort(key=lambda x: x[2], reverse=True)
 
-        # Добавляем только первые 5 самых больших директорий
+        # Adding only first 5 largest directories
         for name, full_path, size in dirs_sizes[:5]:
             child = analyze_directory(full_path, max_depth, current_depth + 1, min_size)
             if child:
                 result['children'].append(child)
 
-        # Сортируем файлы по размеру (убывание) и добавляем первые 5 самых больших
+        # Sort files by size (descending) and add first 5 largest
         files.sort(key=lambda x: x[1], reverse=True)
         for name, size, ext in files[:5]:
             result['children'].append({
@@ -166,38 +166,38 @@ def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_S
 
 
 def generate_report(structure, large_files, large_dirs, file=None):
-    """Генерирует полный отчет"""
-    # Древовидная структура
+    """Generates full report"""
+    # Tree structure
     generate_tree_report(structure, file=file)
 
-    # Топ файлов
-    print("\n\nТоп 10 самых больших файлов:", file=file)
+    # Top files
+    print("\n\nTop 10 largest files:", file=file)
     for i, (path, size) in enumerate(large_files, 1):
         print(f"{i}. {path} - {format_size(size)}", file=file)
 
-    # Топ директорий
-    print("\nТоп 10 самых больших директорий:", file=file)
+    # Top directories
+    print("\nTop 10 largest directories:", file=file)
     for i, (path, size) in enumerate(large_dirs, 1):
         print(f"{i}. {path} - {format_size(size)}", file=file)
 
 
 def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", file=None):
-    """Генерирует древовидную часть отчета с правильными символами ветвления"""
+    """Generates tree part of report with correct branching symbols"""
     if structure is None:
         return
 
     children = structure.get('children', [])
 
-    # Определяем префикс для текущего элемента
+    # Determine prefix for current element
     if level == 0:
-        # Корневая директория
+        # Root directory
         prefix = ""
         connector = ""
     else:
         prefix = parent_prefix
         connector = "└── " if is_last else "├── "
 
-    # Формируем строку для текущего элемента
+    # Forming string for current element
     if structure.get('is_file', False):
         ext = structure.get('extension', 'file')
         line = f"{prefix}{connector}{structure['name']}\t# {format_size(structure['size'])} - {ext} file"
@@ -206,7 +206,7 @@ def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", fi
 
     print(line, file=file)
 
-    # Определяем префикс для детей
+    # Determine prefix for children
     if level > 0:
         if is_last:
             child_prefix = parent_prefix + "    "
@@ -215,13 +215,13 @@ def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", fi
     else:
         child_prefix = ""
 
-    # Рекурсивно обрабатываем детей
+    # Recursively process children
     for i, child in enumerate(children):
         is_last_child = (i == len(children) - 1)
         generate_tree_report(child, level + 1, is_last_child, child_prefix, file)
 
 def parse_size(size_str):
-    """Парсит строку с размером (например, '300M', '1G') в байты"""
+    """Parses size string (e.g. '300M', '1G') to bytes"""
     size_str = size_str.upper()
     if 'K' in size_str:
         return int(float(size_str.replace('K', '')) * 1024)
@@ -232,34 +232,34 @@ def parse_size(size_str):
     elif 'T' in size_str:
         return int(float(size_str.replace('T', '')) * 1024 * 1024 * 1024 * 1024)
     else:
-        return int(size_str)  # Байты по умолчанию
+        return int(size_str)  # Default bytes
 
 
 def print_large_items(large_files, large_dirs, top_files, top_dirs):
-    """Выводит топ файлов и директорий в консоль"""
-    print("\nТоп самых больших файлов:")
+    """Outputs top files and directories to console"""
+    print("\nTop largest files:")
     for i, (path, size) in enumerate(large_files[:top_files], 1):
         print(f"{i}. {path} - {format_size(size)}")
 
-    print("\nТоп самых больших директорий:")
+    print("\nTop largest directories:")
     for i, (path, size) in enumerate(large_dirs[:top_dirs], 1):
         print(f"{i}. {path} - {format_size(size)}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Анализирует размеры директорий и создает отчет')
+    parser = argparse.ArgumentParser(description='Analyzes directory sizes and creates report')
     parser.add_argument('directory', nargs='?', default=DEFAULT_DIR,
-                        help=f'Директория для анализа (по умолчанию: {DEFAULT_DIR})')
+                        help=f'Directory to analyze (default: {DEFAULT_DIR})')
     parser.add_argument('--depth', type=int, default=DEFAULT_DEPTH,
-                        help=f'Глубина отображения дерева (по умолчанию: {DEFAULT_DEPTH})')
+                        help=f'Tree display depth (default: {DEFAULT_DEPTH})')
     parser.add_argument('-m', '--min-size', type=str, default='300M',
-                        help='Минимальный размер файлов для отображения (например, 300M, 1G) (по умолчанию: 300M)')
+                        help='Minimum file size to display (e.g. 300M, 1G) (default: 300M)')
     parser.add_argument('-f', '--files', type=int, default=DEFAULT_TOP_FILES,
-                        help=f'Количество топ файлов для отображения (по умолчанию: {DEFAULT_TOP_FILES})')
+                        help=f'Number of top files to display (default: {DEFAULT_TOP_FILES})')
     parser.add_argument('--dirs', type=int, default=DEFAULT_TOP_DIRS,
-                        help=f'Количество топ директорий для отображения (по умолчанию: {DEFAULT_TOP_DIRS})')
+                        help=f'Number of top directories to display (default: {DEFAULT_TOP_DIRS})')
     parser.add_argument('-s', '--silent', action='store_true',
-                        help='Тихий режим (не выводить прогресс и результаты в консоль)')
+                        help='Silent mode (do not output progress and results to console)')
 
     args = parser.parse_args()
 
@@ -269,40 +269,40 @@ def main():
     top_files = args.files
     top_dirs = args.dirs
 
-    # Парсим минимальный размер
+    # Parsing minimum size
     try:
         min_size = parse_size(args.min_size)
     except ValueError:
-        print("Ошибка: неверный формат минимального размера. Используйте например '300M' или '1G'", file=sys.stderr)
+        print("Error: invalid minimum size format. Use for example '300M' or '1G'", file=sys.stderr)
         sys.exit(1)
 
     if not os.path.isdir(target_dir):
-        print(f"Ошибка: '{target_dir}' не является директорией или не существует", file=sys.stderr)
+        print(f"Error: '{target_dir}' is not a directory or doesn't exist", file=sys.stderr)
         sys.exit(1)
 
     progress = ProgressIndicator(silent)
 
     if not silent:
-        print(f"Анализирую директорию: {target_dir}")
-        print(f"Глубина анализа: {depth}, мин. размер файлов: {format_size(min_size)}")
-        print(f"Количество топ файлов: {top_files}, топ директорий: {top_dirs}")
+        print(f"Analyzing directory: {target_dir}")
+        print(f"Analysis depth: {depth}, min file size: {format_size(min_size)}")
+        print(f"Number of top files: {top_files}, top directories: {top_dirs}")
 
-    # Находим самые большие файлы и директории
+    # Finding largest files and directories
     large_files, large_dirs = find_large_items(target_dir, min_size, top_files, top_dirs, progress)
     progress.clear()
 
-    # Анализируем структуру директории
+    # Analyzing directory structure
     structure = analyze_directory(target_dir, depth, min_size=min_size)
 
-    # Генерируем отчет
+    # Generating report
     report_path = os.path.join(os.getcwd(), REPORT_FILE)
     with open(report_path, 'w', encoding='utf-8') as f:
         generate_report(structure, large_files, large_dirs, file=f)
 
     if not silent:
-        # Выводим топ файлов и директорий в консоль
+        # Outputting top files and directories to console
         print_large_items(large_files, large_dirs, top_files, top_dirs)
-        print(f"\nОтчет сохранен в: {report_path}")
+        print(f"\nReport saved to: {report_path}")
 
 
 if __name__ == '__main__':
