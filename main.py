@@ -165,10 +165,15 @@ def analyze_directory(path, max_depth=3, current_depth=0, min_size=DEFAULT_MIN_S
     return result
 
 
-def generate_report(structure, large_files, large_dirs, file=None):
+def generate_report(structure, large_files, large_dirs, file=None, align=False):
     """Генерирует полный отчет"""
-    # Древовидная структура
-    generate_tree_report(structure, file=file)
+    if align:
+        # Два прохода: первый для вычисления позиции выравнивания, второй для вывода
+        max_align_pos = generate_tree_report(structure, file=None, align=True)
+        generate_tree_report(structure, file=file, align=True, max_align_pos=max_align_pos)
+    else:
+        # Обычный вывод без выравнивания
+        generate_tree_report(structure, file=file)
 
     # Топ файлов
     print("\n\nТоп 10 самых больших файлов:", file=file)
@@ -181,10 +186,11 @@ def generate_report(structure, large_files, large_dirs, file=None):
         print(f"{i}. {path} - {format_size(size)}", file=file)
 
 
-def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", file=None):
+def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", file=None, align=False,
+                         max_align_pos=None):
     """Генерирует древовидную часть отчета с правильными символами ветвления"""
     if structure is None:
-        return
+        return 0  # Возвращаем 0 как позицию выравнивания
 
     children = structure.get('children', [])
 
@@ -198,13 +204,47 @@ def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", fi
         connector = "└── " if is_last else "├── "
 
     # Формируем строку для текущего элемента
+    name_part = f"{prefix}{connector}{structure['name']}"
+
+    # Создаем строку без информации о размере
+    if structure.get('is_file', False):
+        line_without_info = f"{name_part}"
+    else:
+        line_without_info = f"{name_part}"
+
+    # Если выравнивание включено, вычисляем позицию для #
+    if align:
+        if max_align_pos is None:
+            # Первый проход - находим максимальную позицию
+            current_length = len(line_without_info.expandtabs())
+            align_pos = current_length + 1  # +1 для пробела перед #
+
+            # Рекурсивно получаем максимальную позицию от детей
+            for i, child in enumerate(children):
+                is_last_child = (i == len(children) - 1)
+                child_align_pos = generate_tree_report(
+                    child, level + 1, is_last_child, parent_prefix, None, align, None
+                )
+                align_pos = max(align_pos, child_align_pos)
+
+            return align_pos
+        else:
+            # Второй проход - выравниваем по max_align_pos
+            current_length = len(line_without_info.expandtabs())
+            spaces_needed = max_align_pos - current_length
+            separator = ' ' * spaces_needed if spaces_needed > 0 else ' '
+    else:
+        separator = '\t'
+
+    # Формируем полную строку
     if structure.get('is_file', False):
         ext = structure.get('extension', 'file')
-        line = f"{prefix}{connector}{structure['name']}\t# {format_size(structure['size'])} - {ext} file"
+        line = f"{name_part}{separator}# {format_size(structure['size'])} - {ext} file"
     else:
-        line = f"{prefix}{connector}{structure['name']}/\t# {format_size(structure['size'])}, {structure['dir_count']} dir, {structure['file_count']} files"
+        line = f"{name_part}{separator}# {format_size(structure['size'])}, {structure['dir_count']} dir, {structure['file_count']} files"
 
-    print(line, file=file)
+    if file is not None:
+        print(line, file=file)
 
     # Определяем префикс для детей
     if level > 0:
@@ -216,9 +256,15 @@ def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", fi
         child_prefix = ""
 
     # Рекурсивно обрабатываем детей
-    for i, child in enumerate(children):
-        is_last_child = (i == len(children) - 1)
-        generate_tree_report(child, level + 1, is_last_child, child_prefix, file)
+    if align and max_align_pos is not None:
+        for i, child in enumerate(children):
+            is_last_child = (i == len(children) - 1)
+            generate_tree_report(child, level + 1, is_last_child, child_prefix, file, align, max_align_pos)
+
+    if align and max_align_pos is None:
+        # Возвращаем позицию для выравнивания (только в первом проходе)
+        return len(line_without_info.expandtabs()) + 1
+
 
 def parse_size(size_str):
     """Парсит строку с размером (например, '300M', '1G') в байты"""
@@ -260,6 +306,8 @@ def main():
                         help=f'Количество топ директорий для отображения (по умолчанию: {DEFAULT_TOP_DIRS})')
     parser.add_argument('-s', '--silent', action='store_true',
                         help='Тихий режим (не выводить прогресс и результаты в консоль)')
+    parser.add_argument('-a', '--align', action='store_true',
+                       help='Выравнивать символы # в отчете')
 
     args = parser.parse_args()
 
@@ -297,7 +345,7 @@ def main():
     # Генерируем отчет
     report_path = os.path.join(os.getcwd(), REPORT_FILE)
     with open(report_path, 'w', encoding='utf-8') as f:
-        generate_report(structure, large_files, large_dirs, file=f)
+        generate_report(structure, large_files, large_dirs, file=f, align=args.align)
 
     if not silent:
         # Выводим топ файлов и директорий в консоль
