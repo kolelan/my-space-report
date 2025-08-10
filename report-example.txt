@@ -1,0 +1,60 @@
+C:\Users\user\Documents/        # 37.9 GB, 991 dir, 9170 files
+├── Flashka A/                  # 11.4 GB, 7 dir, 220 files
+│   └── 2023-01-11/             # 11.4 GB, 6 dir, 210 files
+│       ├── skory/	            # 802.2 MB, 0 dir, 2 files
+│       ├── Ram/	            # 361.1 MB, 3 dir, 201 files
+│       ├── Skp/	            # 73.9 MB, 0 dir, 4 files
+│       └── backup_db_kamar.sql.gz	# 10.2 GB - gz file
+├── Flashka A2/	                # 9.2 GB, 19 dir, 611 files
+│   ├── Тириль/	                # 6.4 GB, 13 dir, 435 files
+│   │   ├── Туми в г.Тириле/	# 1.5 GB, 0 dir, 101 files
+│   │   ├── Нуи в дыс/	        # 915.6 MB, 0 dir, 30 files
+│   │   ├── г.Нуи/	            # 904.7 MB, 0 dir, 51 files
+│   │   ├── г.Аим (Петр)/	    # 793.6 MB, 0 dir, 64 files
+│   │   └── ГИМС в г.Тириле/	# 548.1 MB, 0 dir, 36 files
+│   ├── Итури/	                # 1.4 GB, 0 dir, 67 files
+│   ├── МИУ/	                # 1.3 GB, 0 dir, 75 files
+│   │   └── 20230120_131729.mp4	# 307.5 MB - mp4 file
+│   ├── ПШИР/	                # 63.4 MB, 0 dir, 5 files
+│   └── HPSCANS/	            # 41.3 MB, 0 dir, 22 files
+├── My Bin/	                # 6.2 GB, 4 dir, 1823 files
+│   └── ruin/	                # 6.2 GB, 3 dir, 1823 files
+│       ├── saves/	            # 6.2 GB, 0 dir, 1787 files
+│       ├── SKSE/	            # 111.0 KB, 0 dir, 31 files
+│       └── Logs/	            # 444.0 B, 0 dir, 2 files
+├── Logo/	                # 4.0 GB, 25 dir, 123 files
+│   └── How20230129/	        # 4.0 GB, 24 dir, 122 files
+│       ├── Camera/	            # 3.3 GB, 1 dir, 104 files
+│       ├── STEREO/	            # 661.6 MB, 10 dir, 18 files
+│       └── 4CH/	            # 0.0 B, 10 dir, 0 files
+└── 101D5100/	                # 3.6 GB, 0 dir, 41 files
+    ├── DSC_0015.MOV	# 1.1 GB - mov file
+    ├── DSC_0004.MOV	# 752.0 MB - mov file
+    ├── DSC_0007.MOV	# 725.0 MB - mov file
+    ├── DSC_0008.MOV	# 439.8 MB - mov file
+    └── DSC_0012.MOV	# 317.1 MB - mov file
+
+
+Топ 10 самых больших файлов:
+1. C:\Users\user\Documents\Flashka A\2023-01-11\backup_db_kamar.sql.gz - 10.2 GB
+2. C:\Users\user\Documents\101D5100\DSC_0015.MOV - 1.1 GB
+3. C:\Users\user\Documents\101D5100\DSC_0004.MOV - 752.0 MB
+4. C:\Users\user\Documents\101D5100\DSC_0007.MOV - 725.0 MB
+5. C:\Users\user\Documents\101D5100\DSC_0008.MOV - 439.8 MB
+6. C:\Users\user\Documents\Logo\How20230129\Camera\VID_20230120_201636.mp4 - 436.1 MB
+7. C:\Users\user\Documents\Flashka A\2023-01-11\skory\kamar-2.10.7-20211212_1657.tar.gz - 413.4 MB
+8. C:\Users\user\Documents\Flashka A\2023-01-11\skory\kamar-2.10.7-20221229_1501.tar.gz - 388.8 MB
+9. C:\Users\user\Documents\образцы\20241120\batimetry_rgb\batimetry_rgb.tif - 351.2 MB
+10. C:\Users\user\Documents\Logo\How20230129\Camera\VID_20230120_215720.mp4 - 350.0 MB
+
+Топ 10 самых больших директорий:
+1. C:\Users\user\Documents - 37.9 GB
+2. C:\Users\user\Documents\Flashka A - 11.4 GB
+3. C:\Users\user\Documents\Flashka A\2023-01-11 - 11.4 GB
+4. C:\Users\user\Documents\Flashka A2 - 9.2 GB
+5. C:\Users\user\Documents\Flashka A2\Тириль - 6.4 GB
+6. C:\Users\user\Documents\My Bin - 6.2 GB
+7. C:\Users\user\Documents\My Bin\ruin - 6.2 GB
+8. C:\Users\user\Documents\My Bin\ruin\saves - 6.2 GB
+9. C:\Users\user\Documents\Logo - 4.0 GB
+10. C:\Users\user\Documents\Logo\How20230129 - 4.0 GB
