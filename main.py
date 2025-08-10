@@ -181,37 +181,44 @@ def generate_report(structure, large_files, large_dirs, file=None):
         print(f"{i}. {path} - {format_size(size)}", file=file)
 
 
-def generate_tree_report(structure, level=0, is_last=False, file=None):
+def generate_tree_report(structure, level=0, is_last=False, parent_prefix="", file=None):
     """Генерирует древовидную часть отчета с правильными символами ветвления"""
     if structure is None:
         return
 
-    # Получаем список детей или пустой список, если ключа нет
     children = structure.get('children', [])
 
-    # Определяем отступы и символы соединения
-    indent = '    ' * (level - 1) if level > 0 else ''
-    connector = '└── ' if is_last else '├── '
-
+    # Определяем префикс для текущего элемента
     if level == 0:
         # Корневая директория
-        line = f"{structure['name']}/\t# {format_size(structure['size'])}, {structure['dir_count']} dir, {structure['file_count']} files"
+        prefix = ""
+        connector = ""
     else:
-        if structure.get('is_file', False):
-            # Это файл
-            ext = structure.get('extension', 'file')
-            line = f"{indent}{connector}{structure['name']}\t# {format_size(structure['size'])} - {ext} file"
-        else:
-            # Это директория
-            line = f"{indent}{connector}{structure['name']}/\t# {format_size(structure['size'])}, {structure['dir_count']} dir, {structure['file_count']} files"
+        prefix = parent_prefix
+        connector = "└── " if is_last else "├── "
+
+    # Формируем строку для текущего элемента
+    if structure.get('is_file', False):
+        ext = structure.get('extension', 'file')
+        line = f"{prefix}{connector}{structure['name']}\t# {format_size(structure['size'])} - {ext} file"
+    else:
+        line = f"{prefix}{connector}{structure['name']}/\t# {format_size(structure['size'])}, {structure['dir_count']} dir, {structure['file_count']} files"
 
     print(line, file=file)
+
+    # Определяем префикс для детей
+    if level > 0:
+        if is_last:
+            child_prefix = parent_prefix + "    "
+        else:
+            child_prefix = parent_prefix + "│   "
+    else:
+        child_prefix = ""
 
     # Рекурсивно обрабатываем детей
     for i, child in enumerate(children):
         is_last_child = (i == len(children) - 1)
-        new_indent = '    ' * level if level > 0 else ''
-        generate_tree_report(child, level + 1, is_last_child, file)
+        generate_tree_report(child, level + 1, is_last_child, child_prefix, file)
 
 def parse_size(size_str):
     """Парсит строку с размером (например, '300M', '1G') в байты"""
